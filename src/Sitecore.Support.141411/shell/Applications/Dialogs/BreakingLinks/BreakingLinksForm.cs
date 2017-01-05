@@ -364,6 +364,15 @@ namespace Sitecore.Support.Shell.Applications.Dialogs.BreakingLinks
             Item sourceItem = link.GetSourceItem();
             if ((sourceItem != null) && !ID.IsNullOrEmpty(link.SourceFieldID))
             {
+
+              #region Fix141411
+              /// Default english version can be a fallback version.
+              /// In this case we should edit existing version or otherwise new english version will be created instead of the fallback one.
+              if (sourceItem.IsFallback)
+              {
+                sourceItem = sourceItem.GetFallbackItem();
+              } 
+              #endregion
               this.RelinkLink(sourceItem, link);
             }
           }
@@ -471,14 +480,22 @@ namespace Sitecore.Support.Shell.Applications.Dialogs.BreakingLinks
         {
           this.RemoveItemLinks(linkDatabase, item, removeCloneLinks);
         }
+
         foreach (ItemLink link in linkDatabase.GetReferrers(targetItem))
         {
           if (removeCloneLinks || ((link.SourceFieldID != FieldIDs.Source) && (link.SourceFieldID != FieldIDs.SourceItem)))
           {
             Item sourceItem = link.GetSourceItem();
-            // !sourceItem.IsFallback check was added as a fix
-            if ((sourceItem != null) && !sourceItem.IsFallback && !ID.IsNullOrEmpty(link.SourceFieldID))
+            if ((sourceItem != null) && !ID.IsNullOrEmpty(link.SourceFieldID))
             {
+              #region Fix141411
+              /// Default english version can be a fallback version.
+              /// In this case we should edit existing version or otherwise new english version will be created instead of the fallback one.
+              if (sourceItem.IsFallback)
+              {
+                sourceItem = sourceItem.GetFallbackItem();
+              } 
+              #endregion
               RemoveLink(sourceItem, link);
             }
           }
